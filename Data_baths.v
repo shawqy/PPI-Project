@@ -27,36 +27,165 @@ input write,
 input read,
 input cs,
 input reset,
-input [1:0] A
-
+input [1:0] A_in
     );
-wire [7:0] databus;
-wire group_control,data_bus;
-wire portA,portB,portC,r,w,c,re;
-wire [1:0] Aa;
 
-Control_logic control (
-    .RD_n(r), 
-    .WR_n(w), 
-    .A(Aa), 
-    .Reset(re), 
-    .CS_n(c), 
-    .data_bus(data_bus), 
-    .group_control(group_control), 
-    .port_control_A(portA), 
-    .port_control_B(portB), 
-    .port_control_C(portC)
+wire control_to_buffer;
+wire [7:0] main_bus;
+wire [7:0] D_main;
+
+assign D_main =(control_to_buffer)? D : 8'bzzzz_zzzz ;
+ 
+Data_bus_buffer buss_buffer (
+    .control_logic(control_to_buffer), 
+    .bus_cpu(main_bus), 
+    .bus(D_main)
     );
 	 
-	 assign Aa = A;
-	 assign r = read;
-	 assign w = write;
-	 assign re = reset;
-	 assign cs = c;
-Data_bus_buffer buffer(
-	 .control_logic(data_bus),
-	 .databus(databus),
-	 .bus(D)
+	 
+wire RD_n,WR_n,Reset,CS_n,group_control,port_control_A,port_control_B,port_control_C;
+wire [1:0] A;
+
+
+assign RD_n = read;
+assign WR_n = write;
+assign Reset = reset;
+assign CS_n = cs;
+assign A = A_in;	 
+ 
+ 
+Control_logic control (
+    .RD_n(RD_n), 
+    .WR_n(WR_n), 
+    .A(A), 
+    .Reset(Reset), 
+    .CS_n(CS_n), 
+    .data_bus(control_to_buffer), 
+    .group_control(group_control), 
+    .port_control_A(port_control_A), 
+    .port_control_B(port_control_B), 
+    .port_control_C(port_control_C)
     );
+wire [7:0] port_A;
+wire group_control_A;
+
+assign port_A = (group_control_A)? PA : 8'bzzzz_zzzz;
+
+Port_A port_a (
+    .A(port_A), 
+    .A_cpu(main_bus), 
+    .group_control(group_control_A), 
+    .control_logic(port_control_A)
+    );
+
+wire [7:0] B;
+wire group_control_B;
+
+assign B = (group_control_B)? PB : 8'bzzzz_zzzz;
+
+Port_B port_b (
+    .B(B), 
+    .B_cpu(main_bus), 
+    .group_control(group_control_B), 
+    .control_logic(port_control_B)
+    );
+
+
+wire [3:0] C_u;
+wire group_control_C_upper,BSR_mode_u;
+wire [3:0] BSR_u;
+assign C_u = (group_control_C_upper)? PC[7:4] : 4'bzzzz;
+
+Port_C port_c_upper (
+    .C(C_u), 
+    .C_cpu(main_bus[7:4]), 
+    .group_control(group_control_C_upper), 
+    .control_logic(port_control_C), 
+    .BSR(BSR_u), 
+    .BSR_mode(BSR_mode_u)
+    );
+	 
+
+wire [3:0] C_l;
+wire group_control_C_lower,BSR_mode_l;
+wire [3:0] BSR_l;
+assign C_l = (group_control_C_lower)? PC[3:0]	 : 4'bzzzz;
+	 
+Port_C port_c_lower (
+    .C(C_l), 
+    .C_cpu(main_bus[3:0]), 
+    .group_control(group_control_C_lower), 
+    .control_logic(port_control_C), 
+    .BSR(BSR_l), 
+    .BSR_mode(BSR_mode_l)
+    );
+
+
+Group_A_control group_A (
+    .control_logic(group_control), 
+    .bus_cpu(main_bus), 
+    .port_control_A(group_control_A), 
+    .port_control_C_U(group_control_C_upper), 
+    .bus(BSR_u), 
+    .BSR_mode(BSR_mode_u)
+    );
+
+
+
+Group_B_control group_B (
+    .control_logic(group_control), 
+    .bus_cpu(main_bus), 
+    .port_control_B(group_control_B), 
+    .port_control_C_L(group_control_C_lower), 
+    .bus(BSR_l), 
+    .BSR_mode(BSR_mode_l)
+    );
+
+
+
+	 
+
+endmodule
+
+
+
+
+
+
+
+
+
+module testbench();
+
+wire [7:0] D,PA,PB,PC;
+reg write,read,cs,reset;
+reg [1:0] A;
+
+
+Data_baths PPI (
+    .D(D), 
+    .PA(PA), 
+    .PB(PB), 
+    .PC(PC), 
+    .write(write), 
+    .read(read), 
+    .cs(cs), 
+    .reset(reset), 
+    .A_in(A_in)
+    );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 endmodule
