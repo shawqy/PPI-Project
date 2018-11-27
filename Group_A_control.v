@@ -2,19 +2,17 @@
 
 module Group_A_control(
 input control_logic, //1 for control mode
-inout [7:0] bus_cpu, // D6,D5,D4,D3
+input [7:0] bus_cpu, // D6,D5,D4,D3
 output reg port_control_A,
-output reg port_control_C_U
+output reg port_control_C_U,
+output reg [3:0] bus,
+output reg BSR_mode
+
     );
 	 
-reg [7:0] bus;
-always@ (bus_cpu)
-begin
-bus <= bus_cpu;
 
-end
  
-assign bus_cpu = (!bus_cpu[7]&&control_logic)? bus : 8'bzzzz_zzzz;
+//assign bus_cpu = (!bus_cpu[7]&&control_logic)? bus : 8'bzzzz_zzzz;
 
 always@(control_logic,bus_cpu)
 		if (control_logic)
@@ -22,7 +20,7 @@ always@(control_logic,bus_cpu)
 			
 			if(bus_cpu[7])
 			begin //mode select flag
-				
+				BSR_mode <= 1'b0;
 				casez (bus_cpu[6:5])
 				
 					2'b00 : begin
@@ -34,30 +32,24 @@ always@(control_logic,bus_cpu)
 			
 			end //end of mode select
 		else begin //BSR
-			
+			BSR_mode <= 1'b1;
 				casez (bus_cpu[3:1])
 					
-					3'b111: bus <=(bus_cpu[0])? 8'bzzzz_zzz1 :8'bzzzz_zzz0;
-					3'b110: bus <=(bus_cpu[0])? 8'bzzzz_zz1z :8'bzzzz_zz0z;
-					3'b101: bus <=(bus_cpu[0])? 8'bzzzz_z1zz:8'bzzzz_z0zz;
-					3'b100: bus <=(bus_cpu[0])? 8'bzzzz_1zzz :8'bzzzz_0zzz;
-					default:bus <=8'bzzzz_zzzz;
+					3'b111: bus <=(bus_cpu[0])? 4'b1zzz :4'b0zzz;
+					3'b110: bus <=(bus_cpu[0])? 4'bz1zz :4'bz0zz;
+					3'b101: bus <=(bus_cpu[0])? 4'bzz1z :4'bzz0z;
+					3'b100: bus <=(bus_cpu[0])? 4'bzzz1 :4'bzzz0;
+					default:bus <=4'bzzzz;
 					
 				endcase
 			
 			end //end of BSR 
 		end // if
-   /*assign  bus_cpu = (!control_logic)? 8'bzzzz_zzzz: 
-				(bus_cpu[7])? 8'bzzzz_zzzz:
-				(bus_cpu[3:1] == 3'b111)? {7'bzzzz_zzz,bus_cpu[0]}:
-				(bus_cpu[3:1] == 3'b110)? {2'bzz,bus_cpu[0],5'bzzzzz}: //zz_1_zzzzz
-				(bus_cpu[3:1] == 3'b101)? {3'bzzz,bus_cpu[0],4'bzzzz}:
-				(bus_cpu[3:1] == 3'b100)? {4'bzzzz,bus_cpu[0],3'bzzz}: 8'bzzzz_zzzz;
-			*/	
+   
 				
 endmodule
 
-
+/*
 module test_group_control();
 
 reg control_logic;
@@ -103,4 +95,4 @@ end
 
 endmodule
 
-
+*/
