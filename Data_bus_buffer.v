@@ -23,26 +23,14 @@ input control_logic,
 inout [7:0] bus_cpu,
 inout [7:0] bus
     );
-/*
-always@ (control_logic)
 
-if(!control_logic)begin
-
-	bus <= databus;
-
-end
-else begin
-
-	databus <= bus;
-
-end*/
 
 assign bus = (control_logic)? 8'bzzzz_zzzz : bus_cpu; // if control = 1 A processor write on ports
 assign bus_cpu = (control_logic)? bus : 8'bzzzz_zzzz; // if control = 0 processor read from ports
 
 endmodule
 
-
+/*
 
 module testbuffer();
 
@@ -86,3 +74,4 @@ end
 
 
 endmodule
+*/
