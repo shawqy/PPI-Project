@@ -37,7 +37,7 @@ assign A_cpu = (!control_logic)? 8'bzzzz_zzzz: (group_control)? A: 8'bzzzz_zzzz;
 
 endmodule
 
-
+/*
 
 module test_port();
 
@@ -74,4 +74,4 @@ control_logic <=1'b0;
  	 
 
 
-endmodule
+endmodule*/
