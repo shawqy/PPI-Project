@@ -65,11 +65,11 @@ begin
 			
 			if (RD_n && !WR_n)
 			begin
-				data_bus <= 0 ;
+				data_bus <= 1 ;
 			end
 			else if (!RD_n && WR_n)
 			begin
-				data_bus <= 1 ;
+				data_bus <= 0 ;
 			end
 		end
 		
