@@ -25,8 +25,8 @@ inout [7:0] bus
     );
 
 
-assign bus = (control_logic)? 8'bzzzz_zzzz : bus_cpu; // if control = 1 A processor write on ports
-assign bus_cpu = (control_logic)? bus : 8'bzzzz_zzzz; // if control = 0 processor read from ports
+assign bus = (control_logic)? bus_cpu : 8'bzzzz_zzzz ; // if control = 1 A processor write on ports
+assign bus_cpu = (control_logic)? 8'bzzzz_zzzz : bus; // if control = 0 processor read from ports
 
 endmodule
 
