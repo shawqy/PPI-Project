@@ -24,8 +24,8 @@ always@(control_logic,bus_cpu)
 				casez (bus_cpu[6:5])
 				
 					2'b00 : begin
-					port_control_A <= (bus_cpu[4])? 1'b1 : 1'b0 ;
-					port_control_C_U <= (bus_cpu[3])? 1'b1 : 1'b0 ;
+					port_control_A <= (bus_cpu[4])? 1'b0 : 1'b1 ;
+					port_control_C_U <= (bus_cpu[3])? 1'b0 : 1'b1 ;
 					end
 									
 				endcase
@@ -33,6 +33,8 @@ always@(control_logic,bus_cpu)
 			end //end of mode select
 		else begin //BSR
 			BSR_mode <= 1'b1;
+			port_control_C_U <=1'b0;
+
 				casez (bus_cpu[3:1])
 					
 					3'b111: bus <=(bus_cpu[0])? 4'b1zzz :4'b0zzz;
